@@ -2,6 +2,7 @@ package com.techexchange.mobileapps.recyclerdemo;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,14 +11,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class SingleQuestionFragment extends Fragment {
-    private static final String TAG = SingleQuestionFragment.class.getSimpleName();
     private static final String ARG_QUESTION_TEXT = "ARG_QUESTION_TEXT";
     private static final String ARG_CORRECT_ANSWER = "ARG_CORRECT_ANSWER";
     private static final String ARG_WRONG_ANSWER = "ARG_WRONG_ANSWER";
     private static final String ARG_QUESTION_INDEX = "ARG_QUESTION_INDEX";
     private static final String ARG_SELECTED_ANSWER = "ARG_SELECTED_ANSWER";
-    private static int questionIndex;
-    private TextView questionView, leftButton, rightButton, selectedAnswerView, correctTextView;
+    private int questionIndexs;
+    private TextView questionView, leftButton, rightButton, correctTextView;
     private Question question;
     private OnQuestionAnsweredListener answerListener;
 
@@ -35,14 +35,13 @@ public class SingleQuestionFragment extends Fragment {
         fragArgs.putString(ARG_WRONG_ANSWER, question.getWrongAnswer());
         fragArgs.putInt(ARG_QUESTION_INDEX, questionIndex);
         fragArgs.putString(ARG_SELECTED_ANSWER, question.getSelectedAnswer());
-
         SingleQuestionFragment frag = new SingleQuestionFragment();
         frag.setArguments(fragArgs);
         return frag;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_quiz, container, false);
@@ -53,12 +52,13 @@ public class SingleQuestionFragment extends Fragment {
         rightButton = rootView.findViewById(R.id.right_button);
         correctTextView = rootView.findViewById(R.id.correct_incorrect_text);
         Bundle args = getArguments();
-        System.out.println("El index del questions es: " + questionIndex);
 
         if (args != null) {
 
             correctTextView.setText(R.string.initial_correct_incorrect);
-            questionIndex = args.getInt(ARG_QUESTION_INDEX);
+            questionIndexs = args.getInt(ARG_QUESTION_INDEX);
+
+            System.out.println("El index del questions es: " + questionIndexs);
             String q, ca, ia;
 
             q = args.getString(ARG_QUESTION_TEXT);
@@ -90,7 +90,6 @@ public class SingleQuestionFragment extends Fragment {
 
     private void onAnswerButtonPressed(View v) {
         Button selectedButton = (Button) v;
-        Question ques;
         if (question.getCorrectAnswer().contentEquals(selectedButton.getText())) {
             correctTextView.setText("Correct!");
         } else {
@@ -98,7 +97,7 @@ public class SingleQuestionFragment extends Fragment {
         }
         leftButton.setEnabled(false);
         rightButton.setEnabled(false);
-        answerListener.onQuestionAnswered(selectedButton.getText().toString(), questionIndex);
+        answerListener.onQuestionAnswered(selectedButton.getText().toString(), questionIndexs);
     }
 
     @Override

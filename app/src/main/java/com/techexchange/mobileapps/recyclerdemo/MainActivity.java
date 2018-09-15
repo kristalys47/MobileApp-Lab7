@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.util.Preconditions;
 import android.support.v4.view.ViewPager;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
     private int currentScore = 0;
     private List<Question> questions;
     private int attempt = 0;
+    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
 
         FragmentManager fm = getSupportFragmentManager();
         questions = initQuestionList();
-        ViewPager viewPager = findViewById(R.id.question_pager);
+        viewPager = findViewById(R.id.question_pager);
         viewPager.setAdapter(new QuestionFragmentAdapter(fm, questions));
     }
 
@@ -57,28 +59,39 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
         System.out.println("Current answer: " + questionId);
         TextView mTextView;
 
-        if (selectedAnswer.contentEquals(questions.get(questionId-1).getCorrectAnswer())) {
+        if (questions.get(questionId).getSelectedAnswer() == null) {
+            if (selectedAnswer.contentEquals(questions.get(questionId).getCorrectAnswer())) {
+                currentScore++;
+                System.out.println(currentScore);
+                questions.get(questionId).setSelectedAnswer(selectedAnswer);
+            }
+            attempt++;
 
-            currentScore++;
-        }
-        attempt++;
 
-
-        if (attempt == questions.size()){
-            System.out.println("Enters the intent");
-            Intent scoreIntent = new Intent(this, ScoreActivity.class);
-            scoreIntent.putExtra(KEY_SCORE, currentScore);
-            startActivityForResult(scoreIntent, 0);
+            if (attempt == questions.size()) {
+                System.out.println("Enters the intent");
+                Intent scoreIntent = new Intent(this, ScoreActivity.class);
+                scoreIntent.putExtra(KEY_SCORE, currentScore);
+                startActivityForResult(scoreIntent, 0);
+            }
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        boolean repeat = getIntent().getBooleanExtra(ScoreActivity.KEY_RESTART_QUIZ, true);
-        finish();
+        boolean repeat = data.getBooleanExtra(ScoreActivity.KEY_RESTART_QUIZ, true);
         if (resultCode != Activity.RESULT_OK || requestCode != 0 || data == null) {
             finish();
+        }
+        else if(repeat){
+            currentScore = 0;
+            attempt = 0;
+            for(Question q: questions){
+                q.setSelectedAnswer(null);
+            }
+            viewPager.setAdapter(new QuestionFragmentAdapter(getSupportFragmentManager(), questions));
+
         }
         else
             finish();
@@ -92,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
         public QuestionFragmentAdapter(FragmentManager fm, List<Question> questions) {
             super(fm);
             this.questions = questions;
-            System.out.println(questions.size());
         }
 
         @Override
