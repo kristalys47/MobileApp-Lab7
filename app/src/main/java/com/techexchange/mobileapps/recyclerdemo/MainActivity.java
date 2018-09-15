@@ -7,12 +7,12 @@ import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.util.Preconditions;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.techexchange.mobileapps.recyclerdemo.SingleQuestionFragment.OnQuestionAnsweredListener;
@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
 
     static final String KEY_SCORE = "Score";
     private int currentScore = 0;
+    private List<Question> questions;
+    private int attempt = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,25 +33,39 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
         setContentView(R.layout.activity_main);
 
         FragmentManager fm = getSupportFragmentManager();
+        questions = initQuestionList();
+        ViewPager viewPager = findViewById(R.id.question_pager);
+        viewPager.setAdapter(new QuestionFragmentAdapter(fm, questions));
+    }
 
-        ViewPager viewPager = findViewById(R.id.contact_pager);
-        viewPager.setAdapter(new QuestionFragmentAdapter(fm, MainActivity.this));
+    private List<Question> initQuestionList() {
+        Resources res = getResources();
+        String[] questions = res.getStringArray(R.array.questions);
+        String[] correctAnswers = res.getStringArray(R.array.correct_answers);
+        String[] wrongAnswers = res.getStringArray(R.array.incorrect_answers);
+
+
+        List<Question> qList = new ArrayList<>();
+        for (int i = 0; i < questions.length; ++i) {
+            qList.add(new Question(questions[i], correctAnswers[i], wrongAnswers[i]));
+        }
+        return qList;
     }
     @Override
     public void onQuestionAnswered(String selectedAnswer, int questionId) {
-        String[] temp = getResources().getStringArray(R.array.correct_answers);
         System.out.println("The " + selectedAnswer + " button was pressed!");
         System.out.println("Current answer: " + questionId);
+        TextView mTextView;
 
-        if (selectedAnswer.equals(temp[questionId-1])) {
+        if (selectedAnswer.contentEquals(questions.get(questionId-1).getCorrectAnswer())) {
+
             currentScore++;
             Toast.makeText(MainActivity.this, "Correct!",Toast.LENGTH_SHORT).show();
-            System.out.println("Current Score: " + currentScore);
         }
-        else
-            Toast.makeText(MainActivity.this, "Incorrect! Swipe left to continue.",Toast.LENGTH_SHORT).show();
+        attempt++;
 
-        if (questionId == temp.length-1){
+
+        if (attempt == questions.size()){
             System.out.println("Enters the intent");
             Intent scoreIntent = new Intent(this, ScoreActivity.class);
             scoreIntent.putExtra(KEY_SCORE, currentScore);
@@ -71,32 +87,24 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
 
     private static final class QuestionFragmentAdapter
             extends FragmentStatePagerAdapter {
-        private Context context;
-        private Resources res;
-        private String[] q;
-        private String[] ca;
-        private String[] ia;
+        private List<Question> questions;
 
-        public QuestionFragmentAdapter(FragmentManager fm, Context context) {
+
+        public QuestionFragmentAdapter(FragmentManager fm, List<Question> questions) {
             super(fm);
-            this.context = context;
-            this.res = context.getResources();
-            this.q = res.getStringArray(R.array.questions);
-            this.ca = res.getStringArray(R.array.correct_answers);
-            this.ia = res.getStringArray(R.array.incorrect_answers);
+            this.questions = questions;
+            System.out.println(questions.size());
         }
 
         @Override
         public Fragment getItem(int position) {
-            Question question = new Question(q[position], ca[position], ia[position]);
-            return SingleQuestionFragment.createFragmentFromQuestion(question, position);
+            return SingleQuestionFragment.createFragmentFromQuestion(questions.get(position), position);
         }
-
 
 
         @Override
         public int getCount() {
-            return q.length;
+            return questions.size();
 
         }
     }
