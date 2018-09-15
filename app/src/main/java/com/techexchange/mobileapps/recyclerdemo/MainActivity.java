@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
         if (selectedAnswer.contentEquals(questions.get(questionId-1).getCorrectAnswer())) {
 
             currentScore++;
-            Toast.makeText(MainActivity.this, "Correct!",Toast.LENGTH_SHORT).show();
         }
         attempt++;
 
