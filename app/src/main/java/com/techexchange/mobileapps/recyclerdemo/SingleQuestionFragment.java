@@ -49,6 +49,7 @@ public class SingleQuestionFragment extends Fragment {
         correctTextView = rootView.findViewById(R.id.correct_incorrect_text);
         Bundle args = getArguments();
         questionIndex = args.getInt(ARG_QUESTION_INDEX);
+        System.out.println("EL Index del questions es: " + questionIndex);
         if (args != null) {
             questionView.setText(args.getString(ARG_QUESTION_TEXT));
             if (Math.random() < 0.5) {

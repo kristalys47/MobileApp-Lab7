@@ -7,10 +7,14 @@ import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
+
 import com.techexchange.mobileapps.recyclerdemo.SingleQuestionFragment.OnQuestionAnsweredListener;
 
 import java.util.ArrayList;
@@ -34,16 +38,18 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
     @Override
     public void onQuestionAnswered(String selectedAnswer, int questionId) {
         String[] temp = getResources().getStringArray(R.array.correct_answers);
-
         System.out.println("The " + selectedAnswer + " button was pressed!");
         System.out.println("Current answer: " + questionId);
 
-
         if (selectedAnswer.equals(temp[questionId-1])) {
             currentScore++;
+            Toast.makeText(MainActivity.this, "Correct!",Toast.LENGTH_SHORT).show();
             System.out.println("Current Score: " + currentScore);
         }
-        if (questionId == 3){
+        else
+            Toast.makeText(MainActivity.this, "Incorrect! Swipe left to continue.",Toast.LENGTH_SHORT).show();
+
+        if (questionId == temp.length-1){
             System.out.println("Enters the intent");
             Intent scoreIntent = new Intent(this, ScoreActivity.class);
             scoreIntent.putExtra(KEY_SCORE, currentScore);
@@ -55,11 +61,9 @@ public class MainActivity extends AppCompatActivity implements OnQuestionAnswere
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         boolean repeat = getIntent().getBooleanExtra(ScoreActivity.KEY_RESTART_QUIZ, true);
+        finish();
         if (resultCode != Activity.RESULT_OK || requestCode != 0 || data == null) {
             finish();
-        }
-        else if(repeat){
-            currentScore = 0;
         }
         else
             finish();

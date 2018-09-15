@@ -12,13 +12,14 @@ import android.widget.Toast;
 public class ScoreActivity extends AppCompatActivity {
 
     static final String KEY_RESTART_QUIZ = "RetakeQuiz";
+    static final String HIGHSCORE = "HIGHSCORE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_score);
-        Button againButton = findViewById(R.id.again_button);
-        againButton.setOnClickListener(v -> onAgainButtonPressed());
+        Button againButton = findViewById(R.id.exit_button);
+        againButton.setOnClickListener(v -> exitButtonPressed());
         TextView scoreText = findViewById(R.id.score_text);
         int score = getIntent().getIntExtra(MainActivity.KEY_SCORE, 0);
         scoreText.setText("Quiz Score: " + score);
@@ -26,23 +27,17 @@ public class ScoreActivity extends AppCompatActivity {
 
         SharedPreferences shared_pref = getSharedPreferences("Shared_Pref", MODE_PRIVATE);
         SharedPreferences.Editor editor = shared_pref.edit();
-        int sp_score = shared_pref.getInt("Score", -1);
-        if(sp_score==-1 ){
-            editor.putInt("Score", score);
+        //shared_pref.edit().clear().commit();
+        int sp_score = shared_pref.getInt(HIGHSCORE, -1);
+        if (sp_score < score) {
+            editor.putInt(HIGHSCORE, score);
             editor.commit();
-        }
-        else {
-            if (sp_score < score) {
-                editor.putInt("Score", score);
-                editor.commit();
-                Toast.makeText(this, "You have a new highscore! " + score, Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(this, "You have a new highscore! " + score, Toast.LENGTH_LONG).show();
         }
     }
-
-    private void onAgainButtonPressed() {
+    
+    private void exitButtonPressed() {
         Intent data = new Intent();
-        data.putExtra(KEY_RESTART_QUIZ, true);
         setResult(Activity.RESULT_OK, data);
         finish();
     }

@@ -31,4 +31,9 @@ class Question {
     public void setSelectedAnswer(String selectedAnswer) {
         this.selectedAnswer = selectedAnswer;
     }
+
+    @Override
+    public String toString() {
+        return "Question: " + this.question + "\nCorrect Answer: " + this.correctAnswer + "\nIncorrectAnswer" + this.wrongAnswer;
+    }
 }
